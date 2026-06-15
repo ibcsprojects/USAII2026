@@ -2,8 +2,14 @@
   "manifest_version": 3,
   "name": "GreenPage",
   "version": "1.0",
-  "description": "Helping reduce printer waste",
-  "action": {
-    "default_popup": "popup.html"
-  }
+  "description": "Helping reduce print paper waste",
+  "permissions": ["activeTab", "storage"],
+  "host_permissions": ["https://docs.google.com/document/*"],
+  "content_scripts": [
+    {
+      "matches": ["https://docs.google.com/document/*"],
+      "js": ["content.js"],
+      "css": ["content.css"]
+    }
+  ]
 }

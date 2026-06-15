@@ -1,0 +1,26 @@
+#custom-suggestion-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: #fff3cd;
+  border-bottom: 1px solid #ffeeba;
+  padding: 10px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 2147483647;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  font-family: Arial, sans-serif;
+}
+
+.suggestion-actions button {
+  margin-left: 10px;
+  padding: 5px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-accept { background-color: #28a745; color: white; }
+.btn-reject { background-color: #dc3545; color: white; }
