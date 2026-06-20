@@ -1,31 +1,22 @@
-function createSuggestionBar() {
-  const bar = document.createElement('div');
-  bar.id = 'custom-suggestion-bar';
-  bar.innerHTML = `
-    <span>We found a suggestion for your text: "<strong>Example Suggestion</strong>"</span>
-    <div class="suggestion-actions">
-      <button class="btn-accept">Accept</button>
-      <button class="btn-reject">Reject</button>
-    </div>
-  `;
-
-  document.body.prepend(bar);
-
-  bar.querySelector('.btn-accept').addEventListener('click', () => {
-    applySuggestion();
-    bar.remove();
-  });
-
-  bar.querySelector('.btn-reject').addEventListener('click', () => {
-    bar.remove();
-  });
+function init() {
+  window.GreenPagesSummarySidebar.mount();
+  window.GreenPagesOverlay.mount();
+  window.GreenPagesAnalysis.start();
 }
 
-function applySuggestion() {
-  const editor = document.querySelector('.docs-kix-editor');
-  if (editor) {
-
+chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+  if (message?.type === 'GREENPAGES_GET_STATE') {
+    sendResponse(window.GreenPagesFlagStore.getState());
+  } else if (message?.type === 'GREENPAGES_OPEN_SIDEBAR') {
+    window.GreenPagesSummarySidebar.open();
+    sendResponse({ ok: true });
+  } else if (message?.type === 'GREENPAGES_PREVIEW_PRINT_GUARD') {
+    window.GreenPagesPrintIntercept.openPrintGuard();
+    sendResponse({ ok: true });
+  } else if (message?.type === 'GREENPAGES_FORCE_ANALYZE') {
+    window.GreenPagesAnalysis.runNow().then(() => sendResponse({ ok: true }));
+    return true;
   }
-}
+});
 
-createSuggestionBar();
+init();

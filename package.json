@@ -1,0 +1,12 @@
+{
+  "name": "greenpages",
+  "version": "1.0.0",
+  "private": true,
+  "description": "GreenPages: Chrome extension + Vercel/Gemini backend for catching wasteful print formatting in Google Docs.",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node textAnchor.test.js && node docsApi.test.js && node api/analyze.test.js"
+  }
+}
