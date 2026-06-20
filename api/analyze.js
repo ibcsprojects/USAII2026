@@ -58,9 +58,9 @@ function validateFlags(rawFlags, currentSnapshot) {
 
 async function callGemini(paragraphs, apiKey, fetchImpl) {
   const doFetch = fetchImpl || fetch;
-  const res = await doFetch(`${GEMINI_URL}?key=${apiKey}`, {
+  const res = await doFetch(GEMINI_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
     body: JSON.stringify({
       systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
       contents: [{ role: 'user', parts: [{ text: JSON.stringify(paragraphs) }] }],
