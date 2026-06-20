@@ -1,23 +1,24 @@
 (function (root) {
-  const DOCS_API_BASE = 'https://docs.googleapis.com/v1/documents';
-
   function getDocumentIdFromUrl() {
     const match = window.location.pathname.match(/\/document\/d\/([a-zA-Z0-9_-]+)/);
     return match ? match[1] : null;
   }
 
-  function getAccessToken() {
+  // chrome.identity isn't available to content scripts, so the actual token +
+  // fetch calls run in background.js (a privileged extension context); this
+  // just relays the request there and waits for the response.
+  function sendToBackground(message) {
     return new Promise((resolve, reject) => {
-      if (!chrome.identity || !chrome.identity.getAuthToken) {
-        reject(new Error('chrome.identity unavailable — add an oauth2 client_id to manifest.json (see README)'));
-        return;
-      }
-      chrome.identity.getAuthToken({ interactive: true }, (token) => {
-        if (chrome.runtime.lastError || !token) {
-          reject(new Error(chrome.runtime.lastError ? chrome.runtime.lastError.message : 'No token returned'));
+      chrome.runtime.sendMessage(message, (response) => {
+        if (chrome.runtime.lastError) {
+          reject(new Error(chrome.runtime.lastError.message));
           return;
         }
-        resolve(token);
+        if (response && response.error) {
+          reject(new Error(response.error));
+          return;
+        }
+        resolve(response);
       });
     });
   }
@@ -68,15 +69,7 @@
   async function fetchSnapshot() {
     const documentId = getDocumentIdFromUrl();
     if (!documentId) throw new Error('Could not resolve a document ID from the current URL');
-    const token = await getAccessToken();
-    const res = await fetch(`${DOCS_API_BASE}/${documentId}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (!res.ok) {
-      const body = await res.text();
-      throw new Error(`Docs API documents.get failed (${res.status}): ${body}`);
-    }
-    const doc = await res.json();
+    const { doc } = await sendToBackground({ type: 'GREENPAGES_BG_FETCH_SNAPSHOT', documentId });
     lastSnapshot = parseSnapshot(doc);
     return lastSnapshot;
   }
@@ -144,20 +137,8 @@
     const requests = buildRequests(flag, range);
     const documentId = getDocumentIdFromUrl();
     if (!documentId) throw new Error('Could not resolve a document ID from the current URL');
-    const token = await getAccessToken();
-    const res = await fetch(`${DOCS_API_BASE}/${documentId}:batchUpdate`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ requests }),
-    });
-    if (!res.ok) {
-      const body = await res.text();
-      throw new Error(`Docs API batchUpdate failed (${res.status}): ${body}`);
-    }
-    return res.json();
+    const { result } = await sendToBackground({ type: 'GREENPAGES_BG_BATCH_UPDATE', documentId, requests });
+    return result;
   }
 
   const api = {
@@ -168,7 +149,6 @@
     getLastSnapshot,
     parseSnapshot,
     getDocumentIdFromUrl,
-    getAccessToken,
   };
 
   if (typeof module !== 'undefined' && module.exports) {
