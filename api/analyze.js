@@ -8,7 +8,7 @@ const ALLOWED_TYPES = new Set([
   'IMAGE_RESIZE',
 ]);
 
-const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
+const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
 
 const SYSTEM_PROMPT = `You are GreenPages, an eco-formatting analyzer for student documents in Google Docs.
 You will receive a JSON array of paragraphs, each with: paragraphId, text, maxFontSize, hasHighlight, isBullet.

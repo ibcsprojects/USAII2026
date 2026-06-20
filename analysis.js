@@ -1,7 +1,5 @@
 (function () {
-  // Update after deploying the Vercel project (see README) — until then,
-  // analysis passes fetch a live snapshot but skip the backend call.
-  const BACKEND_URL = 'https://YOUR-VERCEL-PROJECT.vercel.app/api/analyze';
+  const BACKEND_URL = 'https://usaii-2026.vercel.app/api/analyze';
   const DEBOUNCE_MS = 8000;
   const EDITOR_SELECTOR = '.kix-appview-editor';
 
