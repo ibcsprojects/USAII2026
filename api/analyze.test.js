@@ -95,6 +95,7 @@ run('validateFlags drops unknown types and paragraphIds not in the snapshot', ()
     let body = null;
     const req = { method: 'POST', body: { currentSnapshot: {} } };
     const res = {
+      setHeader() {},
       status(code) { statusCode = code; return this; },
       json(payload) { body = payload; },
     };
@@ -108,11 +109,29 @@ run('validateFlags drops unknown types and paragraphIds not in the snapshot', ()
     let statusCode = null;
     const req = { method: 'GET' };
     const res = {
+      setHeader() {},
       status(code) { statusCode = code; return this; },
       json() {},
     };
     await handlerModule(req, res);
     assert.strictEqual(statusCode, 405);
+  });
+
+  await runAsync('handler answers CORS preflight with 204 and the right headers', async () => {
+    let statusCode = null;
+    let ended = false;
+    const headers = {};
+    const req = { method: 'OPTIONS' };
+    const res = {
+      setHeader(name, value) { headers[name] = value; },
+      status(code) { statusCode = code; return this; },
+      end() { ended = true; },
+      json() {},
+    };
+    await handlerModule(req, res);
+    assert.strictEqual(statusCode, 204);
+    assert.strictEqual(ended, true);
+    assert.strictEqual(headers['Access-Control-Allow-Origin'], '*');
   });
 
   console.log('analyze.test.js: all assertions passed');

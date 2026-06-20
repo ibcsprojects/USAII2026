@@ -112,6 +112,17 @@ async function analyze(payload, apiKey, fetchImpl) {
 }
 
 async function handler(req, res) {
+  // analysis.js calls this from a content script running on docs.google.com —
+  // a different origin than this Vercel deployment — so without CORS headers
+  // the browser blocks the response (and silently no-ops the preflight below).
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.method === 'OPTIONS') {
+    res.status(204).end();
+    return;
+  }
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Method not allowed' });
     return;
