@@ -20,7 +20,8 @@ function charsToPaper(chars: number, doc: DocModel): number {
 }
 
 function isBlank(p: Paragraph): boolean {
-  return paragraphText(p).trim().length === 0 && p.kind !== 'pageBreak'
+  const hasImage = p.runs.some((r) => r.imageObjectId)
+  return paragraphText(p).trim().length === 0 && p.kind !== 'pageBreak' && !hasImage
 }
 
 // ---------------------------------------------------------------------------
@@ -163,7 +164,9 @@ function detectBulletSprawl(doc: DocModel): Flag[] {
       const rows = bullets.map(paragraphText)
       const avgWords =
         rows.reduce((s, t) => s + t.trim().split(/\s+/).length, 0) / rows.length
-      if (bullets.length >= 5 && avgWords <= 4) {
+      // 5+/<=4 words was tuned to the contrived sample doc ("Sales: high") and almost
+      // never matched real bullet lists, which usually run longer per item.
+      if (bullets.length >= 4 && avgWords <= 8) {
         const range: Range = { start: bullets[0].start!, end: bullets[j - 1 - i].end! }
         flags.push({
           id: fid('bullets'),
@@ -224,6 +227,39 @@ function detectVerbose(doc: DocModel, aiRewrite: boolean): Flag[] {
   return flags
 }
 
+// ---------------------------------------------------------------------------
+// 7. Inline images wider than the text column → shrink them. Docs API supports
+//    resizing embedded images directly (updateInlineObjectProperties), so unlike the
+//    original brief's assumption this is genuinely auto-fixable, not suggestion-only.
+// ---------------------------------------------------------------------------
+const MAX_IMAGE_WIDTH_PT = 400 // ~ a standard body text column width
+
+function detectOversizedImages(doc: DocModel): Flag[] {
+  const flags: Flag[] = []
+  for (const p of doc.paragraphs) {
+    for (const r of p.runs) {
+      if (!r.imageObjectId || !r.imageWidthPt || r.imageWidthPt <= MAX_IMAGE_WIDTH_PT) continue
+      const range: Range = { start: r.start!, end: r.end! }
+      const scale = MAX_IMAGE_WIDTH_PT / r.imageWidthPt
+      const heightPt = r.imageHeightPt ? Math.round(r.imageHeightPt * scale) : undefined
+      flags.push({
+        id: fid('image'),
+        type: 'imageResize',
+        severity: 'low',
+        range,
+        title: `Image is ${Math.round(r.imageWidthPt)}pt wide`,
+        explanation:
+          'This image is wider than a standard text column. Shrinking it keeps it legible while using less ink and page space.',
+        before: `${Math.round(r.imageWidthPt)}pt wide`,
+        after: `${MAX_IMAGE_WIDTH_PT}pt wide`,
+        impact: { paper: 0.05, ink: 0.3 },
+        action: { kind: 'resizeImage', range, objectId: r.imageObjectId, widthPt: MAX_IMAGE_WIDTH_PT, heightPt },
+      })
+    }
+  }
+  return flags
+}
+
 function truncate(s: string, n = 60): string {
   const t = s.replace(/\s+/g, ' ').trim()
   return t.length > n ? t.slice(0, n - 1) + '…' : t
@@ -245,6 +281,7 @@ export function analyzeDoc(doc: DocModel, opts: AnalyzeDocOptions = {}): Flag[] 
     ...detectPageBreaks(doc),
     ...detectBulletSprawl(doc),
     ...detectVerbose(doc, opts.aiRewrite ?? false),
+    ...detectOversizedImages(doc),
   ]
   return flags.sort((a, b) => a.range.start - b.range.start)
 }

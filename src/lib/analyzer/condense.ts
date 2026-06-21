@@ -38,14 +38,12 @@ export function condenseLocally(input: string): string {
   return out
 }
 
-/** Heuristic: is this paragraph wordy enough to be worth condensing? */
+/** Heuristic: is this paragraph wordy enough to be worth condensing?
+ *  Deliberately generous — with AI enabled, the cost of a false positive is one Gemini
+ *  call that decides it can't shorten things further; the cost of a false negative was
+ *  real paragraphs never reaching Gemini at all (the previous 25/35-word + phrase-match
+ *  gate was too strict for ordinary prose, not just the contrived sample doc). */
 export function looksVerbose(text: string): boolean {
   const words = text.trim().split(/\s+/).filter(Boolean)
-  if (words.length < 25) return false
-  const condensed = condenseLocally(text)
-  // Worth flagging if our offline pass can already trim a meaningful chunk...
-  if (condensed.length <= text.length * 0.9) return true
-  // ...or if the paragraph is simply long and dense: the AI rewrite can tighten
-  // these even when our fixed phrase list doesn't match anything.
-  return words.length >= 35
+  return words.length >= 20
 }

@@ -17,6 +17,11 @@ export interface TextRun {
   /** Google Docs document index of this run's first character (read path). Enables
    *  translating our flat-text offsets back to Docs API indices for write-back. */
   docStart?: number
+  // ---- inline image runs: text is '' (contributes no length to flat offsets) ----
+  /** Docs API inlineObjectId — present only on image runs. */
+  imageObjectId?: string
+  imageWidthPt?: number
+  imageHeightPt?: number
   // ---- computed by rebuildOffsets ----
   start?: number
   end?: number
@@ -142,6 +147,11 @@ export const SAMPLE_DOC: DocModel = rebuildOffsets({
     { id: pid(), kind: 'bullet', runs: [run('Finance: high')] },
     { id: pid(), kind: 'bullet', runs: [run('Support: low')] },
     { id: pid(), kind: 'bullet', runs: [run('Design: low')] },
+    {
+      id: pid(),
+      kind: 'normal',
+      runs: [{ text: '', fontSize: 11, imageObjectId: 'sample-img-1', imageWidthPt: 600, imageHeightPt: 360 }],
+    },
     {
       id: pid(),
       kind: 'normal',

@@ -8,8 +8,16 @@ const flags = analyzeDoc(SAMPLE_DOC)
 const typesIn = (t: string) => flags.filter((f) => f.type === t)
 
 describe('analyzeDoc on the sample doc', () => {
-  it('detects each of the six waste categories', () => {
-    for (const t of ['highlight', 'fontSize', 'doubleSpacing', 'pageBreak', 'bulletSprawl', 'verbose']) {
+  it('detects each of the seven waste categories', () => {
+    for (const t of [
+      'highlight',
+      'fontSize',
+      'doubleSpacing',
+      'pageBreak',
+      'bulletSprawl',
+      'verbose',
+      'imageResize',
+    ]) {
       expect(typesIn(t).length, `expected at least one ${t} flag`).toBeGreaterThan(0)
     }
   })

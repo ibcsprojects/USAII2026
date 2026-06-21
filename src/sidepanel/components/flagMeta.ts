@@ -7,6 +7,7 @@ export const FLAG_META: Record<FlagType, { label: string; icon: string; accent: 
   pageBreak: { label: 'Paper — page break', icon: '⤓', accent: 'bg-rose-100 text-rose-800' },
   bulletSprawl: { label: 'Paper — layout', icon: '☰', accent: 'bg-teal-100 text-teal-800' },
   verbose: { label: 'Paper — wordiness', icon: '✂️', accent: 'bg-leaf-100 text-leaf-800' },
+  imageResize: { label: 'Paper — image size', icon: '🖼️', accent: 'bg-indigo-100 text-indigo-800' },
 }
 
 export const SEVERITY_DOT: Record<Severity, string> = {

@@ -104,6 +104,7 @@ interface ApiElement {
   endIndex?: number
   textRun?: { content?: string; textStyle?: ApiTextStyle }
   pageBreak?: unknown
+  inlineObjectElement?: { inlineObjectId: string }
 }
 interface ApiParagraph {
   elements?: ApiElement[]
@@ -115,17 +116,30 @@ interface ApiStructural {
   endIndex?: number
   paragraph?: ApiParagraph
 }
+interface ApiDimension {
+  magnitude?: number
+  unit?: string
+}
+interface ApiInlineObject {
+  inlineObjectProperties?: {
+    embeddedObject?: {
+      size?: { width?: ApiDimension; height?: ApiDimension }
+    }
+  }
+}
 interface ApiDoc {
   title?: string
   body?: { content?: ApiStructural[] }
+  inlineObjects?: Record<string, ApiInlineObject>
 }
 
 function mapApiDoc(docId: string, api: ApiDoc): DocModel {
+  const inlineObjects = api.inlineObjects ?? {}
   const paragraphs: Paragraph[] = []
   let i = 0
   for (const el of api.body?.content ?? []) {
     if (!el.paragraph) continue // skip tables / sectionBreaks we don't model
-    paragraphs.push(mapParagraph(`p${i++}`, el, el.paragraph))
+    paragraphs.push(mapParagraph(`p${i++}`, el, el.paragraph, inlineObjects))
   }
   if (paragraphs.length === 0) {
     paragraphs.push({ id: 'p0', kind: 'normal', runs: [{ text: '', fontSize: DEFAULT_FONT }] })
@@ -139,7 +153,12 @@ function mapApiDoc(docId: string, api: ApiDoc): DocModel {
   })
 }
 
-function mapParagraph(id: string, el: ApiStructural, para: ApiParagraph): Paragraph {
+function mapParagraph(
+  id: string,
+  el: ApiStructural,
+  para: ApiParagraph,
+  inlineObjects: Record<string, ApiInlineObject>,
+): Paragraph {
   const elements = para.elements ?? []
   const named = para.paragraphStyle?.namedStyleType ?? ''
   const kind: Paragraph['kind'] = elements.some((e) => e.pageBreak)
@@ -150,7 +169,13 @@ function mapParagraph(id: string, el: ApiStructural, para: ApiParagraph): Paragr
         ? 'heading'
         : 'normal'
 
-  const runs: TextRun[] = elements.filter((e) => e.textRun).map(mapRun)
+  const runs: TextRun[] = elements
+    .map((e) => {
+      if (e.textRun) return mapRun(e)
+      if (e.inlineObjectElement) return mapImageRun(e, inlineObjects)
+      return null
+    })
+    .filter((r): r is TextRun => r !== null)
   if (runs.length === 0) {
     // Empty / break-only paragraphs still need a run so the analyzer + offsets work.
     runs.push({ text: '', fontSize: DEFAULT_FONT, docStart: el.startIndex })
@@ -172,6 +197,26 @@ function mapRun(e: ApiElement): TextRun {
     highlightColor: rgbToHex(ts.backgroundColor?.color?.rgbColor),
     fontSize: ts.fontSize?.magnitude ?? DEFAULT_FONT,
     docStart: e.startIndex,
+  }
+}
+
+// Converts a Dimension to points regardless of the unit Docs reports it in (it's
+// normally PT already, but guard against EMU just in case: 1pt = 12700 EMU).
+function toPt(d?: ApiDimension): number | undefined {
+  if (d?.magnitude == null) return undefined
+  return d.unit === 'EMU' ? d.magnitude / 12700 : d.magnitude
+}
+
+function mapImageRun(e: ApiElement, inlineObjects: Record<string, ApiInlineObject>): TextRun {
+  const objectId = e.inlineObjectElement!.inlineObjectId
+  const size = inlineObjects[objectId]?.inlineObjectProperties?.embeddedObject?.size
+  return {
+    text: '',
+    fontSize: DEFAULT_FONT,
+    docStart: e.startIndex,
+    imageObjectId: objectId,
+    imageWidthPt: toPt(size?.width),
+    imageHeightPt: toPt(size?.height),
   }
 }
 

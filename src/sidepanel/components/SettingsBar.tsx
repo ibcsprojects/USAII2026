@@ -10,6 +10,7 @@ const ALL_TYPES: FlagType[] = [
   'pageBreak',
   'bulletSprawl',
   'verbose',
+  'imageResize',
 ]
 
 export function SettingsBar() {

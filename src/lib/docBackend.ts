@@ -99,6 +99,15 @@ export class MockDocsBackend implements EditBackend {
         }
         break
       }
+
+      case 'resizeImage':
+        forRuns(next, action.range, (r) => {
+          if (r.imageObjectId === action.objectId) {
+            r.imageWidthPt = action.widthPt
+            r.imageHeightPt = action.heightPt
+          }
+        })
+        break
     }
     return rebuildOffsets(next)
   }
@@ -245,6 +254,24 @@ export function buildRequests(doc: DocModel, action: EditAction): unknown[] {
         { insertText: { location: { index: startIndex }, text: toTwoColumnText(action.rows) } },
       ]
     }
+
+    case 'resizeImage':
+      return [
+        {
+          updateInlineObjectProperties: {
+            objectId: action.objectId,
+            inlineObjectProperties: {
+              embeddedObject: {
+                size: {
+                  width: { magnitude: action.widthPt, unit: 'PT' },
+                  height: { magnitude: action.heightPt ?? action.widthPt, unit: 'PT' },
+                },
+              },
+            },
+            fields: 'embeddedObject.size',
+          },
+        },
+      ]
   }
 }
 
