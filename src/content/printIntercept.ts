@@ -33,14 +33,17 @@ async function intercept(): Promise<void> {
 }
 
 export function installPrintIntercept(): void {
-  // Capture the keyboard shortcut before Docs/Chrome handles it.
-  window.addEventListener(
+  // Capture the keyboard shortcut before Docs' own Ctrl/Cmd+P handler does — Docs calls
+  // window.print() itself to show its print preview, and that handler doesn't check
+  // defaultPrevented, so stopPropagation() alone isn't enough if it's bound to the same
+  // node; stopImmediatePropagation() is what actually keeps Docs' handler from also firing.
+  document.addEventListener(
     'keydown',
     (e) => {
-      const isPrint = (e.ctrlKey || e.metaKey) && (e.key === 'p' || e.key === 'P')
+      const isPrint = (e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey && (e.key === 'p' || e.key === 'P')
       if (isPrint) {
         e.preventDefault()
-        e.stopPropagation()
+        e.stopImmediatePropagation()
         void intercept()
       }
     },

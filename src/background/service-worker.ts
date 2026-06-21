@@ -139,7 +139,11 @@ chrome.runtime.onInstalled.addListener(() => {
 onMessage(async (msg: Msg, sender) => {
   switch (msg.type) {
     case 'GET_STATE':
-      if (state.flags.length === 0) {
+      // Retry the live connection on every call until it actually succeeds once — not
+      // just when flags.length === 0, which becomes permanently false after the very
+      // first pass (even the offline sample analyzes to 6 flags), silently freezing the
+      // panel on the sample doc forever if the first connection attempt ever failed.
+      if (!liveLoaded) {
         await loadSettings()
         await ensureDoc()
         await reanalyze()
@@ -206,7 +210,7 @@ onMessage(async (msg: Msg, sender) => {
     }
 
     case 'GET_PRINT_SUMMARY': {
-      if (state.flags.length === 0) {
+      if (!liveLoaded) {
         await loadSettings()
         await ensureDoc()
         await reanalyze()
