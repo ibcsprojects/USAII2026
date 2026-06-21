@@ -46,6 +46,26 @@ Then load it in Chrome:
 | `npm run build` | Type-check + production bundle to `dist/` |
 | `npm test` | Vitest — the rules engine + edit backend |
 
+## For hackathon moderators / judges
+
+You don't need to build anything to try this — just load the pre-built extension:
+
+1. Go to `chrome://extensions`, enable **Developer mode** (top-right toggle).
+2. Click **Load unpacked** and select the `dist/` folder from this submission.
+3. Open any Google Doc, then click the **🌿 GreenPages** pill (bottom-right of the page)
+   or the extension's toolbar icon to open the side panel.
+4. The extension works immediately against a bundled offline demo document — no sign-in
+   needed to see the core feature set (flag detection, Apply/Dismiss, the eco-score, and
+   the Ctrl/Cmd+P print-intercept modal).
+
+**To test it against your own real Google Doc** (live read/write via the Docs API), Chrome
+will ask you to sign in and grant access the first time. Because this extension isn't
+published to the Chrome Web Store, Google restricts who can complete that sign-in to a
+fixed list of approved testers — **please email [team email addresses] and ask to be
+added as an authorized tester** before you try this part. Once you're added, the sign-in
+prompt will work normally. If you skip this step, the extension still works fine — it
+simply stays on the offline demo document instead of reading your real one.
+
 ## How it's wired
 
 See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md). Short version: the side panel and a
