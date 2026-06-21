@@ -34,7 +34,7 @@ export default defineManifest({
     default_path: 'src/sidepanel/index.html',
   },
   oauth2: {
-     client_id: '607806555304-5fqrvu6f75121qj69p68h1aositrhp8s.apps.googleusercontent.com',
+     client_id: '415665395282-ci25olqg8gn4qjcbljgiqi9mobo282c2.apps.googleusercontent.com',
      // documents: read/write the doc. drive.readonly: export the doc to PDF so we can count
      // its real rendered pages (the Docs API exposes no page count).
      scopes: [
