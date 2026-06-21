@@ -12,14 +12,25 @@ export async function geminiGenerate(prompt: string): Promise<string | null> {
   if (!key) return null
 
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${key}`
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: { temperature: 0.2, maxOutputTokens: 512 },
-    }),
-  })
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), 8000)
+  let res: Response
+  try {
+    res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { temperature: 0.2, maxOutputTokens: 512 },
+      }),
+      signal: controller.signal,
+    })
+  } catch (err) {
+    console.warn('[GreenPages] Gemini request failed/timed out', err)
+    return null
+  } finally {
+    clearTimeout(timer)
+  }
   if (!res.ok) {
     console.warn('[GreenPages] Gemini error', res.status, await res.text())
     return null

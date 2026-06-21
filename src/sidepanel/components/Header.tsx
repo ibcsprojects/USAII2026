@@ -4,6 +4,8 @@ import { EcoScore } from './EcoScore'
 export function Header() {
   const reanalyze = useStore((s) => s.reanalyze)
   const loading = useStore((s) => s.loading)
+  const usingSampleDoc = useStore((s) => s.usingSampleDoc)
+  const connectionError = useStore((s) => s.connectionError)
 
   return (
     <header className="sticky top-0 z-10 border-b border-leaf-100 bg-leaf-50/95 px-3 pb-2 pt-3 backdrop-blur">
@@ -21,6 +23,12 @@ export function Header() {
           {loading ? 'Scanning…' : '↻ Re-scan'}
         </button>
       </div>
+      {usingSampleDoc && (
+        <div className="mb-2 rounded-lg bg-amber-100 px-2 py-1.5 text-[11px] leading-relaxed text-amber-800">
+          ⚠️ Showing a demo document — not your real Google Doc.
+          {connectionError ? ` ${connectionError}` : ''}
+        </div>
+      )}
       <EcoScore />
     </header>
   )

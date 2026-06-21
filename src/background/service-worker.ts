@@ -20,6 +20,10 @@ interface State {
   flags: Flag[]
   dismissed: Set<string>
   settings: Settings
+  /** True until a real Google Doc has been loaded — the panel must say so visibly
+   *  instead of silently presenting the demo doc as if it were the user's own. */
+  usingSampleDoc: boolean
+  connectionError: string | null
 }
 
 // Defaults to the offline sample + in-memory backend. When the panel opens on a real
@@ -32,6 +36,8 @@ const state: State = {
   flags: [],
   dismissed: new Set(),
   settings: { ...DEFAULT_SETTINGS },
+  usingSampleDoc: true,
+  connectionError: null,
 }
 
 async function loadSettings() {
@@ -48,16 +54,24 @@ async function loadSettings() {
 
 // One-shot: if the active tab is a Google Doc, load it via the Docs API (prompting for
 // OAuth the first time). Any failure (not a doc, auth declined, network) leaves the
-// offline sample in place so the product always works.
+// offline sample in place so the product always works — but state.connectionError records
+// *why*, so the panel can say so instead of silently passing the sample off as real.
 async function ensureDoc() {
   if (liveLoaded) return
+  const docId = await getActiveGoogleDocId()
+  if (!docId) {
+    state.connectionError = 'This tab is not a Google Doc.'
+    return
+  }
   try {
-    const docId = await getActiveGoogleDocId()
-    if (!docId) return
     state.doc = await fetchGoogleDoc(docId)
     backend = new GoogleDocsBackend(docId)
     liveLoaded = true
+    state.usingSampleDoc = false
+    state.connectionError = null
   } catch (err) {
+    const message = err instanceof Error ? err.message : String(err)
+    state.connectionError = message
     console.warn('[GreenPages] Docs API load failed, using sample doc:', err)
   }
 }
@@ -68,8 +82,12 @@ async function refreshLiveDoc() {
   if (!liveLoaded) return
   try {
     const docId = await getActiveGoogleDocId()
-    if (docId) state.doc = await fetchGoogleDoc(docId)
+    if (docId) {
+      state.doc = await fetchGoogleDoc(docId)
+      state.connectionError = null
+    }
   } catch (err) {
+    state.connectionError = err instanceof Error ? err.message : String(err)
     console.warn('[GreenPages] live doc refresh failed:', err)
   }
 }
@@ -95,6 +113,8 @@ function stateMessage(): Msg {
     flags: visibleFlags(),
     dismissed: [...state.dismissed],
     settings: state.settings,
+    usingSampleDoc: state.usingSampleDoc,
+    connectionError: state.connectionError,
   }
 }
 

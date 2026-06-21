@@ -27,7 +27,15 @@ export const DEFAULT_SETTINGS: Settings = {
 export type Msg =
   // side panel ⇄ worker
   | { type: 'GET_STATE' }
-  | { type: 'STATE'; doc: DocModel; flags: Flag[]; dismissed: string[]; settings: Settings }
+  | {
+      type: 'STATE'
+      doc: DocModel
+      flags: Flag[]
+      dismissed: string[]
+      settings: Settings
+      usingSampleDoc: boolean
+      connectionError: string | null
+    }
   | { type: 'REANALYZE' }
   | { type: 'APPLY_FLAG'; flagId: string; overrideText?: string }
   | { type: 'DISMISS_FLAG'; flagId: string }

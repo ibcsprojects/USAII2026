@@ -10,6 +10,8 @@ interface PanelState {
   loading: boolean
   /** Per-flag busy state so a card can show a spinner while applying. */
   busy: Record<string, boolean>
+  usingSampleDoc: boolean
+  connectionError: string | null
   init: () => Promise<void>
   reanalyze: () => Promise<void>
   apply: (flagId: string, overrideText?: string) => Promise<void>
@@ -19,7 +21,14 @@ interface PanelState {
 }
 
 function applyState(set: (p: Partial<PanelState>) => void, msg: Extract<Msg, { type: 'STATE' }>) {
-  set({ doc: msg.doc, flags: msg.flags, settings: msg.settings, loading: false })
+  set({
+    doc: msg.doc,
+    flags: msg.flags,
+    settings: msg.settings,
+    loading: false,
+    usingSampleDoc: msg.usingSampleDoc,
+    connectionError: msg.connectionError,
+  })
 }
 
 export const useStore = create<PanelState>((set, get) => ({
@@ -28,6 +37,8 @@ export const useStore = create<PanelState>((set, get) => ({
   settings: { ...DEFAULT_SETTINGS },
   loading: true,
   busy: {},
+  usingSampleDoc: true,
+  connectionError: null,
 
   init: async () => {
     set({ loading: true })

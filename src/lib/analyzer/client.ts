@@ -12,6 +12,16 @@ export interface AnalyzeOptions {
   backendUrl: string
 }
 
+// Plain fetch() never times out on its own — a slow Vercel cold start or a hung Gemini
+// call would otherwise block the whole side panel indefinitely instead of falling back.
+const BACKEND_TIMEOUT_MS = 10000
+
+function fetchWithTimeout(url: string, init: RequestInit): Promise<Response> {
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), BACKEND_TIMEOUT_MS)
+  return fetch(url, { ...init, signal: controller.signal }).finally(() => clearTimeout(timer))
+}
+
 export async function analyze(doc: DocModel, opts: AnalyzeOptions): Promise<Flag[]> {
   if (opts.useAI && opts.backendUrl) {
     try {
@@ -25,7 +35,7 @@ export async function analyze(doc: DocModel, opts: AnalyzeOptions): Promise<Flag
 }
 
 async function analyzeViaBackend(doc: DocModel, backendUrl: string): Promise<Flag[]> {
-  const res = await fetch(`${backendUrl.replace(/\/$/, '')}/api/analyze`, {
+  const res = await fetchWithTimeout(`${backendUrl.replace(/\/$/, '')}/api/analyze`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ doc, text: flatten(doc) }),
@@ -40,7 +50,7 @@ export async function condenseViaBackend(
   text: string,
   backendUrl: string,
 ): Promise<string> {
-  const res = await fetch(`${backendUrl.replace(/\/$/, '')}/api/condense`, {
+  const res = await fetchWithTimeout(`${backendUrl.replace(/\/$/, '')}/api/condense`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ text }),
