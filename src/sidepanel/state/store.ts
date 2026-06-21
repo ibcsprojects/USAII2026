@@ -10,6 +10,9 @@ interface PanelState {
   loading: boolean
   /** Per-flag busy state so a card can show a spinner while applying. */
   busy: Record<string, boolean>
+  /** Per-flag error message when Apply fails, so the card shows why instead of
+   *  spinning forever or the panel silently corrupting its own state. */
+  applyErrors: Record<string, string>
   usingSampleDoc: boolean
   connectionError: string | null
   init: () => Promise<void>
@@ -18,6 +21,10 @@ interface PanelState {
   dismiss: (flagId: string) => Promise<void>
   updateSettings: (s: Partial<Settings>) => Promise<void>
   jumpTo: (flagId: string) => Promise<void>
+}
+
+function isErrorResponse(msg: unknown): msg is { error: string } {
+  return !!msg && typeof msg === 'object' && 'error' in msg
 }
 
 function applyState(set: (p: Partial<PanelState>) => void, msg: Extract<Msg, { type: 'STATE' }>) {
@@ -37,6 +44,7 @@ export const useStore = create<PanelState>((set, get) => ({
   settings: { ...DEFAULT_SETTINGS },
   loading: true,
   busy: {},
+  applyErrors: {},
   usingSampleDoc: true,
   connectionError: null,
 
@@ -58,16 +66,32 @@ export const useStore = create<PanelState>((set, get) => ({
   },
 
   apply: async (flagId, overrideText) => {
-    set({ busy: { ...get().busy, [flagId]: true } })
-    const msg = await sendMessage<Extract<Msg, { type: 'STATE' }>>({
-      type: 'APPLY_FLAG',
-      flagId,
-      overrideText,
-    })
-    const busy = { ...get().busy }
-    delete busy[flagId]
-    applyState(set, msg)
-    set({ busy })
+    const errors = { ...get().applyErrors }
+    delete errors[flagId]
+    set({ busy: { ...get().busy, [flagId]: true }, applyErrors: errors })
+    try {
+      const msg = await sendMessage<Extract<Msg, { type: 'STATE' }> | { error: string }>({
+        type: 'APPLY_FLAG',
+        flagId,
+        overrideText,
+      })
+      if (isErrorResponse(msg)) {
+        set({ applyErrors: { ...get().applyErrors, [flagId]: msg.error } })
+      } else {
+        applyState(set, msg)
+      }
+    } catch (err) {
+      set({
+        applyErrors: {
+          ...get().applyErrors,
+          [flagId]: err instanceof Error ? err.message : String(err),
+        },
+      })
+    } finally {
+      const busy = { ...get().busy }
+      delete busy[flagId]
+      set({ busy })
+    }
   },
 
   dismiss: async (flagId) => {

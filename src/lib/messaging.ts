@@ -93,9 +93,20 @@ export function onMessage(
   handler: (msg: Msg, sender: chrome.runtime.MessageSender) => void | Promise<unknown>,
 ) {
   chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-    const result = handler(msg as Msg, sender)
+    // sendResponse must always be called exactly once, or the caller's sendMessage()
+    // promise hangs forever — it has no built-in timeout. A handler that throws (e.g. a
+    // failed Docs API write) used to do exactly that, freezing the side panel's "Applying…"
+    // state with no error ever surfacing.
+    const toErrorResponse = (err: unknown) => ({ error: err instanceof Error ? err.message : String(err) })
+    let result: void | Promise<unknown>
+    try {
+      result = handler(msg as Msg, sender)
+    } catch (err) {
+      sendResponse(toErrorResponse(err))
+      return false
+    }
     if (result instanceof Promise) {
-      result.then((r) => sendResponse(r))
+      result.then((r) => sendResponse(r)).catch((err) => sendResponse(toErrorResponse(err)))
       return true // keep the channel open for the async response
     }
     return false

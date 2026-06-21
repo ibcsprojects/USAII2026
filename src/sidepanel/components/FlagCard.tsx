@@ -11,6 +11,7 @@ export function FlagCard({ flag }: { flag: Flag }) {
   const dismiss = useStore((s) => s.dismiss)
   const jumpTo = useStore((s) => s.jumpTo)
   const busy = useStore((s) => s.busy[flag.id])
+  const applyError = useStore((s) => s.applyErrors[flag.id])
   const meta = FLAG_META[flag.type]
 
   // Verbose flags expose an editable AI suggestion, plus 0-2 alternative rewrites the
@@ -113,6 +114,11 @@ export function FlagCard({ flag }: { flag: Flag }) {
           </button>
         )}
       </div>
+      {applyError && (
+        <p className="mt-2 rounded-lg bg-rose-100 px-2 py-1.5 text-[11px] leading-relaxed text-rose-800">
+          Apply failed: {applyError}
+        </p>
+      )}
     </div>
   )
 }
