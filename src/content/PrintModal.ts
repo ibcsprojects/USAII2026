@@ -29,9 +29,6 @@ const STYLE = `
 .stat { display: flex; align-items: baseline; gap: 8px; margin-bottom: 10px; }
 .stat b { font-size: 26px; color: #15803d; }
 .warn { background: #fef9c3; color: #854d0e; border-radius: 10px; padding: 8px 10px; font-size: 12px; margin: 8px 0; }
-.list { margin: 8px 0; max-height: 140px; overflow:auto; border:1px solid #dcfce7; border-radius:10px; }
-.list-item { display:flex; gap:6px; padding:6px 10px; font-size:12px; border-bottom:1px solid #f0fdf4; }
-.list-item:last-child { border-bottom:0; }
 .tips { margin: 10px 0 0; font-size: 12px; color:#3f3f29; }
 .tips li { margin: 3px 0; }
 .foot { display:flex; gap:8px; padding: 14px 18px; border-top:1px solid #f0fdf4; }
@@ -72,14 +69,11 @@ export function showPrintModal(summary: PrintSummary): Promise<PrintModalResult>
         </div>
         <div class="body">
           <div class="stat"><b>${summary.pages}</b><span>estimated page${summary.pages === 1 ? '' : 's'}</span></div>
-          ${heavy ? `<div class="warn">⚠️ This is a large print job. Are you sure you need every page on paper?</div>` : ''}
+          ${heavy ? `<div class="warn">This is a large print job. Are you sure you need every page on paper?</div>` : ''}
           ${
             summary.unresolved.length
-              ? `<div>You still have <b>${summary.unresolved.length}</b> unresolved eco-flag${summary.unresolved.length === 1 ? '' : 's'}:</div>
-                 <div class="list">${summary.unresolved
-                   .map((u) => `<div class="list-item">• ${escapeHtml(u.title)}</div>`)
-                   .join('')}</div>`
-              : `<div class="warn" style="background:#dcfce7;color:#166534">✅ No unresolved flags — nicely optimized!</div>`
+              ? `<div>You still have <b>${summary.unresolved.length}</b> unresolved eco-flag${summary.unresolved.length === 1 ? '' : 's'}</div>`
+              : `<div class="warn" style="background:#dcfce7;color:#166534">No unresolved flags — nicely optimized!</div>`
           }
           <ul class="tips">${tips.map((t) => `<li>${t}</li>`).join('')}</ul>
         </div>
@@ -102,10 +96,4 @@ export function showPrintModal(summary: PrintSummary): Promise<PrintModalResult>
       if (e.target === wrap) done('cancel')
     })
   })
-}
-
-function escapeHtml(s: string): string {
-  return s.replace(/[&<>"']/g, (c) =>
-    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!,
-  )
 }

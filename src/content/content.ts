@@ -231,18 +231,25 @@ function mountPill(): void {
       transition: transform .12s ease, background .12s ease;
     }
     .pill:hover { transform: translateY(-1px); background: #15803d; }
-    .dot { width: 7px; height: 7px; border-radius: 50%; background: #bbf7d0; }
+    .badge {
+      width: 20px; height: 20px; border-radius: 50%; background: #fff;
+      display: grid; place-items: center; flex: 0 0 auto;
+    }
+    .badge img { width: 15px; height: 15px; display: block; }
   `
   root.appendChild(style)
 
+  const logoUrl = chrome.runtime.getURL('icons/icon128.png')
+  const badge = `<span class="badge"><img src="${logoUrl}" alt=""></span>`
+
   const btn = document.createElement('button')
   btn.className = 'pill'
-  btn.innerHTML = `<span class="dot"></span>🌿 GreenPages`
+  btn.innerHTML = `${badge}GreenPages`
   btn.title = 'Open GreenPages eco-formatting panel'
   btn.addEventListener('click', () => {
     sendMessage({ type: 'OPEN_PANEL' }).catch((err) => {
       if (err instanceof ExtensionContextInvalidatedError) {
-        btn.innerHTML = `<span class="dot"></span>↻ Reload page`
+        btn.innerHTML = `${badge}Reload page`
         btn.title = 'GreenPages was updated. Reload this tab to reconnect.'
       } else {
         console.error('[GreenPages] OPEN_PANEL failed', err)

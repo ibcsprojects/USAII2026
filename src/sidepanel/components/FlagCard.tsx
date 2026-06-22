@@ -17,7 +17,7 @@ function FlagChip({ flag }: { flag: Flag }) {
   const meta = FLAG_META[flag.type]
   return (
     <span className={`rounded-md px-1.5 py-0.5 text-[11px] font-medium ${meta.accent}`}>
-      {meta.icon} {meta.label}
+      {meta.label}
     </span>
   )
 }
@@ -43,7 +43,7 @@ function impactLabel(flag: Flag): string {
   const paper = flag.impact.paper
   const ink = flag.impact.ink
   const parts: string[] = []
-  if (paper > 0.001) parts.push(`~${formatPages(paper)} saved`)
+  if (paper > 0.001) parts.push(`${formatPages(paper)} saved`)
   if (ink > 0.001) parts.push('ink↓')
   return parts.join(' · ')
 }
@@ -201,7 +201,7 @@ export function FlagGroupCard({
   const paper = flags.reduce((s, f) => s + f.impact.paper, 0)
   const ink = flags.reduce((s, f) => s + f.impact.ink, 0)
   const totalParts: string[] = []
-  if (paper > 0.001) totalParts.push(`~${formatPages(paper)} saved`)
+  if (paper > 0.001) totalParts.push(`${formatPages(paper)} saved`)
   if (ink > 0.001) totalParts.push('ink↓')
 
   const toggle = () => {

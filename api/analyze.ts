@@ -5,7 +5,7 @@
 
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import type { DocModel } from '../src/lib/docModel.js'
-import { analyzeDoc } from '../src/lib/analyzer/rules.js'
+import { analyzeDoc, charsToPaper } from '../src/lib/analyzer/rules.js'
 import { geminiGenerate, hasGeminiKey } from '../server/lib/gemini.js'
 import { condensePrompt, setCors } from '../server/lib/prompt.js'
 
@@ -36,6 +36,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           f.editableSuggestion = rewritten
           f.action.text = rewritten
           f.after = rewritten.length > 90 ? rewritten.slice(0, 89) + '…' : rewritten
+          // Recompute the saving from the AI's shorter text — the impact set at detection
+          // time was based on the (often no-op) local condense, so without this the card
+          // shows no "% page saved" estimate.
+          f.impact = { ...f.impact, paper: charsToPaper(original.length - rewritten.length, doc) }
         }
       }),
     )

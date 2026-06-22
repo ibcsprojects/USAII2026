@@ -3,11 +3,17 @@ import type { DocModel } from '../../lib/docModel'
 import type { Flag } from '../../lib/analyzer/types'
 import { sendMessage, type Msg, type Settings, DEFAULT_SETTINGS } from '../../lib/messaging'
 
+/** How the flag list is ordered: by position in the doc, or by biggest page saving first. */
+export type SortMode = 'document' | 'savings'
+
 interface PanelState {
   doc: DocModel | null
   flags: Flag[]
   settings: Settings
   loading: boolean
+  /** UI-only ordering of the flag list. Not sent to the worker. */
+  sortMode: SortMode
+  setSortMode: (mode: SortMode) => void
   /** Current page count from the worker — exact (live PDF export) or estimated. */
   pages: number
   /** Set when `pages` is the rough estimate because the exact PDF export failed. */
@@ -65,6 +71,9 @@ export const useStore = create<PanelState>((set, get) => ({
   notice: null,
   error: null,
   busy: {},
+  sortMode: 'document',
+
+  setSortMode: (mode) => set({ sortMode: mode }),
 
   init: async () => {
     set({ loading: true, error: null })

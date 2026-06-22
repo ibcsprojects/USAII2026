@@ -8,10 +8,9 @@ export default defineManifest({
   description:
     'Like Grammarly, but for paper & ink. Flags wasteful print formatting in Google Docs and suggests eco-friendly fixes you accept one at a time.',
   // Pins the extension ID to onaabbhlbchjeddeiecogkbooookdond regardless of which path it's
-  // loaded unpacked from. Without this, every moderator's "Load unpacked" gets a different,
-  // path-derived ID, and the oauth2.client_id below (registered to one specific ID in Google
-  // Cloud Console) would only ever authenticate for whoever that one ID happened to belong
-  // to. See README.md "Setup" for the matching Cloud Console step.
+  // loaded unpacked from. Without this, every install gets a different, path-derived ID,
+  // and the oauth2.client_id below (registered to this one specific ID in Google Cloud
+  // Console) would only ever authenticate for whoever that one ID happened to belong to.
   key: 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqlYJlEPGSfmL8fgV1/qJb7b7T3oUKRSAFCHCbAw8DqyBog2PnFt8Spz/OxdID50NsCbRu2B2cwaXkRVn8fo6BZYX8/WjeSRh8Bos4GnJplBD0VnXDDo4TkOfgVIAPQxX6GwA0AMQM+Q1gUYZlEnFUqu5TtVQzTcslcArQu22YHwsbiNafo5cnRfnWTMyT4fIVcyjR8IE7mZ+xO6ZHmfd/sxuAY14LK8K8+uT6MZ+90PNDu07bowsmhorZky/bjO1OKWpaXTlK3M7kn0GhoF956GbBmmeo0oV4UpInBDo2msYRgvHdYah1ce0Tp99hto/r05wkqOK7YazDgTg+oY+GQIDAQAB',
   icons: {
     '16': 'icons/icon16.png',
@@ -51,5 +50,13 @@ export default defineManifest({
   ],
   permissions: ['sidePanel', 'storage', 'scripting', 'activeTab', 'identity'],
   host_permissions: ['https://docs.google.com/*'],
+  // The injected pill (content script) shows the logo, so the page must be allowed to
+  // load it from the extension.
+  web_accessible_resources: [
+    {
+      resources: ['icons/*'],
+      matches: ['https://docs.google.com/*'],
+    },
+  ],
 })
    

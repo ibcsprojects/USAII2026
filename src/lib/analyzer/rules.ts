@@ -23,7 +23,7 @@ const IMAGE_AREA_LIMIT = 0.25
 let _fid = 0
 const fid = (t: string) => `flag-${t}-${_fid++}`
 
-function charsToPaper(chars: number, doc: DocModel): number {
+export function charsToPaper(chars: number, doc: DocModel): number {
   const charsPerPage = CHARS_PER_LINE * doc.linesPerPage
   return Math.max(0, chars / charsPerPage)
 }
@@ -54,7 +54,7 @@ function detectHighlights(doc: DocModel): Flag[] {
           title: 'Highlighted text wastes ink',
           explanation:
             'Background highlights flood the page with ink when printed. Underline conveys the same emphasis using a fraction of the ink.',
-          before: `🖍️ "${truncate(r.text)}"`,
+          before: `"${truncate(r.text)}"`,
           after: `U̲n̲d̲e̲r̲l̲i̲n̲e̲ "${truncate(r.text)}"`,
           impact: { paper: 0, ink: 0.9 * (r.text.length / 200) },
           action: { kind: 'removeHighlight', range, alt: 'underline' },
@@ -309,7 +309,7 @@ function detectVerbose(doc: DocModel, aiRewrite: boolean): Flag[] {
       explanation:
         'This paragraph is long and padded. Tightening it removes lines without losing meaning — and you can edit the suggestion before applying.',
       before: truncate(text, 90),
-      after: localHelps ? truncate(suggestion, 90) : '✨ AI will rewrite this to be shorter',
+      after: localHelps ? truncate(suggestion, 90) : 'AI will rewrite this to be shorter',
       impact: { paper: charsToPaper(text.length - suggestion.length, doc), ink: 0 },
       action: { kind: 'replaceText', range, text: suggestion },
       editableSuggestion: suggestion,

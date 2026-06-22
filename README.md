@@ -2,8 +2,8 @@
 
 **Like Grammarly, but for paper & ink.** A Chrome extension (Manifest V3) that works
 inside Google Docs, detects wasteful print formatting, and suggests eco-friendly fixes
-you accept **one at a time** from a side panel — plus a print-intercept that double-checks
-you before any wasteful print job.
+you accept **one at a time** (or all at once) from a side panel — plus a print-intercept
+that double-checks you before any wasteful print job.
 
 > Works **100% offline out of the box** against a bundled demo document and a
 > deterministic rules engine. No accounts, no keys. The Google Docs API and Gemini are an
@@ -19,6 +19,11 @@ you before any wasteful print job.
 | ⤓ Hard page break | Half-blank sheet | Slim dashed divider |
 | ☰ Sprawling short bullets | One line each | Compact table |
 | ✂️ Wordy paragraphs | Extra lines | AI-condensed text (editable) |
+| 🖼️ Oversized images | Extra ink/pages | Shrink to a standard column width |
+
+Flags can be applied individually, or all at once with the **Apply all changes** button
+at the bottom of the panel. Use the sort menu (top-right of the flag list) to order issues
+by document position or by biggest paper savings first.
 
 ## Quick start
 
@@ -33,8 +38,8 @@ Then load it in Chrome:
 2. **Load unpacked** → select the `dist/` folder.
 3. Open any Google Doc. Click the **🌿 GreenPages** pill (bottom-right) or the toolbar
    icon to open the side panel.
-4. Review flag cards → **Apply** or **Dismiss** each. The eco-score and "pages saved"
-   update live.
+4. Review flag cards → **Apply**, **Dismiss**, or **Apply all changes**. The eco-score
+   and "pages saved" update live.
 5. Press **Ctrl/Cmd+P** in the doc → the **print-intercept modal** shows the page
    estimate, unresolved flags, and double-sided / paper-size / location reminders.
 
@@ -55,16 +60,17 @@ You don't need to build anything to try this — just load the pre-built extensi
 3. Open any Google Doc, then click the **🌿 GreenPages** pill (bottom-right of the page)
    or the extension's toolbar icon to open the side panel.
 4. The extension works immediately against a bundled offline demo document — no sign-in
-   needed to see the core feature set (flag detection, Apply/Dismiss, the eco-score, and
-   the Ctrl/Cmd+P print-intercept modal).
+   needed to see the core feature set (flag detection, Apply / Dismiss / Apply all, the
+   eco-score, and the Ctrl/Cmd+P print-intercept modal).
 
 **To test it against your own real Google Doc** (live read/write via the Docs API), Chrome
 will ask you to sign in and grant access the first time. Because this extension isn't
 published to the Chrome Web Store, Google restricts who can complete that sign-in to a
-fixed list of approved testers — **please email [team email addresses] and ask to be
-added as an authorized tester** before you try this part. Once you're added, the sign-in
-prompt will work normally. If you skip this step, the extension still works fine — it
-simply stays on the offline demo document instead of reading your real one.
+fixed list of approved testers — **please email boimpurswani@gmail.com or
+gamero.reachme@gmail.com and ask to be added as an authorized tester** before you try this
+part. Once you're added, the sign-in prompt will work normally. If you skip this step, the
+extension still works fine — it simply stays on the offline demo document instead of
+reading your real one.
 
 ## How it's wired
 
