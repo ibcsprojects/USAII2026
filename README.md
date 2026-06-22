@@ -1,4 +1,4 @@
-# 🌿 GreenPages
+# GreenPages
 
 **Like Grammarly, but for paper & ink.** A Chrome extension (Manifest V3) that works
 inside Google Docs, detects wasteful print formatting, and suggests eco-friendly fixes
@@ -13,13 +13,13 @@ that double-checks you before any wasteful print job.
 
 | Flag | Waste | Eco fix |
 |------|-------|---------|
-| 🖍️ Highlighted text | Ink-heavy fills | Switch to underline |
-| 🔠 Oversized body font | Extra pages | Shrink to body size |
-| ↕️ Stacked blank lines | Padding pages | Collapse to one |
-| ⤓ Hard page break | Half-blank sheet | Slim dashed divider |
-| ☰ Sprawling short bullets | One line each | Compact table |
-| ✂️ Wordy paragraphs | Extra lines | AI-condensed text (editable) |
-| 🖼️ Oversized images | Extra ink/pages | Shrink to a standard column width |
+| Highlighted text | Ink-heavy fills | Switch to underline |
+| Oversized body font | Extra pages | Shrink to body size |
+| Stacked blank lines | Padding pages | Collapse to one |
+| Hard page break | Half-blank sheet | Slim dashed divider |
+| Sprawling short bullets | One line each | Compact table |
+| Wordy paragraphs | Extra lines | AI-condensed text (editable) |
+| Oversized images | Extra ink/pages | Shrink to a standard column width |
 
 Flags can be applied individually, or all at once with the **Apply all changes** button
 at the bottom of the panel. Use the sort menu (top-right of the flag list) to order issues
@@ -36,7 +36,7 @@ Then load it in Chrome:
 
 1. Go to `chrome://extensions`, enable **Developer mode**.
 2. **Load unpacked** → select the `dist/` folder.
-3. Open any Google Doc. Click the **🌿 GreenPages** pill (bottom-right) or the toolbar
+3. Open any Google Doc. Click the **GreenPages** pill (bottom-right) or the toolbar
    icon to open the side panel.
 4. Review flag cards → **Apply**, **Dismiss**, or **Apply all changes**. The eco-score
    and "pages saved" update live.
@@ -57,7 +57,7 @@ You don't need to build anything to try this — just load the pre-built extensi
 
 1. Go to `chrome://extensions`, enable **Developer mode** (top-right toggle).
 2. Click **Load unpacked** and select the `dist/` folder from this submission.
-3. Open any Google Doc, then click the **🌿 GreenPages** pill (bottom-right of the page)
+3. Open any Google Doc, then click the **GreenPages** pill (bottom-right of the page)
    or the extension's toolbar icon to open the side panel.
 4. The extension works immediately against a bundled offline demo document — no sign-in
    needed to see the core feature set (flag detection, Apply / Dismiss / Apply all, the
